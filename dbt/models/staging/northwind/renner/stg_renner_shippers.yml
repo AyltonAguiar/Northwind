@@ -1,0 +1,15 @@
+version: 2
+
+models:
+  - name: dim_renner_orderdetails
+    description: tabela dimensão da order details
+    columns:
+      - name: id
+        description: É a primary key formada pelos ids das demais tabelas
+        tests:
+          - unique
+          - not_null
+      - name: transportadoras
+        tests:
+          - accepted_values:
+              values: ['Speedy Express', 'United Package', 'Federal Shipping']

@@ -1,0 +1,21 @@
+version: 2
+
+sources:
+  - name: renner
+    description: 'Database do setor de dados'
+    database: northwind
+    schema: "renner"
+    tables:
+      - name: employees
+        description: "informações sobre os funcionários"
+        columns:
+          - name: employeeid
+            tests:
+            - unique
+      - name: categories
+      - name: customers
+      - name: orderdetails
+      - name: orders
+      - name: products
+      - name: shippers
+      - name: suppliers

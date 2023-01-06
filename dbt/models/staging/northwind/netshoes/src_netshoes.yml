@@ -1,0 +1,28 @@
+version: 2
+
+sources:
+  - name: netshoes
+    database: northwind
+    description: "Cópia das estruturas das tabelas do schema netshoes"
+    freshness: # default freshness
+      warn_after: {count: 12, period: hour}
+      error_after: {count: 5, period: day}
+    loaded_at_field: updated_at
+
+    tables:
+      - name: categories
+        description: "Tabela de categorias do cliente netshoes"
+      - name: customers
+        description: "Tabela de clientes do cliente netshoes"
+      - name: employees
+        description: "Tabela de funcionários do cliente netshoes"
+      - name: orderdetails
+        description: "Tabela de detalhes dos pedidos do cliente netshoes"
+      - name: orders
+        description: "Tabela de pedidos do cliente netshoes"
+      - name: products
+        description: "Tabela de produtos do cliente netshoes"
+      - name: shippers
+        description: "Tabela de transportadoras do cliente netshoes"
+      - name: suppliers
+        description: "Tabela de fornecedores do cliente netshoes"

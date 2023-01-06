@@ -1,0 +1,53 @@
+version: 2
+
+models:
+  - name: stg_netshoes_orders
+    description: ""
+    columns:
+      - name: orderid
+        description: ""
+
+      - name: customerid
+        description: ""
+
+      - name: employeeid
+        description: ""
+
+      - name: orderdate
+        description: ""
+
+      - name: requireddate
+        description: ""
+
+      - name: shippeddate
+        description: ""
+
+      - name: shipvia
+        description: ""
+
+      - name: freight
+        description: ""
+
+      - name: shipname
+        description: ""
+
+      - name: shipaddress
+        description: ""
+
+      - name: shipcity
+        description: ""
+
+      - name: shipregion
+        description: ""
+
+      - name: shippostalcode
+        description: ""
+
+      - name: shipcountry
+        description: ""
+
+      - name: created_at
+        description: ""
+
+      - name: updated_at
+        description: ""

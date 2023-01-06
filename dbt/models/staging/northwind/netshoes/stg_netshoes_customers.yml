@@ -1,0 +1,41 @@
+version: 2
+
+models:
+  - name: stg_netshoes_customers
+    description: "Cópia da tabela original da costumers do banco northwind"
+    columns:
+      - name: customerid
+        description: "Primary key da tabela costumers"
+
+      - name: companyname
+        description: "Nome da empresa integro"
+
+      - name: contactname
+        description: "Nome do responsável"
+
+      - name: contacttitle
+        description: "{{ doc('costumers_contacttitle') }}"
+
+      - name: address
+        description: "Endereço da empresa"
+
+      - name: city
+        description: "Cidade da empresa"
+
+      - name: region
+        description: "Região da empresa"
+
+      - name: postalcode
+        description: "Código postal da empresa"
+
+      - name: country
+        description: "País da empresa"
+
+      - name: phone
+        description: "Contato de celular, residencial, etc"
+
+      - name: created_at
+        description: "data da criação do resgistro no banco de dados"
+
+      - name: updated_at
+        description: "data da última modificação do resgistro no banco de dados"

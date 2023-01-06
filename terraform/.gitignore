@@ -1,0 +1,12 @@
+# .terraform executavel e outputs
+*tfplan.out
+*.terraform
+*.plan
+*.out
+
+# .tfstate files
+*.tfstate
+*.tfstate.*
+
+# infracost
+*.infracost

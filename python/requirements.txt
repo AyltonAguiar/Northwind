@@ -1,0 +1,8 @@
+# Requerimentos
+
+# Bibliotecas de desenvolvimento
+pandas      # Manipulação e análise de dados
+boto3       # Integração aos serviços AWS
+psycopg2    # Adaptador do Banco de dados PostgreSQL
+
+# Sem pacotes com versões específicas
