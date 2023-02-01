@@ -2,14 +2,11 @@ version: 2
 
 sources:
   - name: c&a
-    description: 'Database do setor de dados'
     database: northwind
-    schema: "c&a"
     tables:
-      - name: employees
-        description: "informações sobre os funcionários"
       - name: categories
       - name: customers
+      - name: employees
       - name: orderdetails
       - name: orders
       - name: products

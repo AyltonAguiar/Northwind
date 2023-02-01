@@ -1,8 +1,8 @@
 {{ config(
     materialized='table',
     post_hook=["
-      grant usage on schema {{target.schema}} to group bi_users;
-      grant select on table {{target.schema}}.renner_categorias_mais_vendidas to group bi_users;"]
+      grant usage on schema {{target.schema}} to group reporters;
+      grant select on table {{target.schema}}.renner_categorias_mais_vendidas to group reporters;"]
 ) }}
 
 with

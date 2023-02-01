@@ -1,5 +1,6 @@
 with orderdetails as (
-    select odd.orderid,
+    select odd.orderid ||'_'|| odd.productid as id,
+           odd.orderid,
            odd.productid,
            odd.preco_vendido,
            odd.quantidade_vendida,
