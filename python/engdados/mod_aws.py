@@ -19,6 +19,7 @@ def get_bucket(s3_client, backend_bucket, backend_key):
         return False
     return bucket_name
 
+
 def get_csv_s3(s3_client, bucket_name):
     # Lista os Objetos do bucket setado e armazena na variável s3_objects
     try:
@@ -35,13 +36,23 @@ def get_csv_s3(s3_client, bucket_name):
         return False
     return s3_objects
 
+
 def get_secrets_redshift(client_secret, redshift_secrete_name):
     try:
         # Captura dos segredos do redshift na AWS Secrets
         get_secret_value_response = client_secret.get_secret_value(SecretId = redshift_secrete_name)
         secret_json = json.loads(get_secret_value_response['SecretString'])
+      
+    except Exception as e:
+        logging.error(e)
+        return False
+    return secret_json
 
-        redshift_db_name= secret_json.get('data_base')
+
+def get_credentials_redshift(secret_json):
+    try:
+        # Credenciais do Redshift
+        redshift_db_name = secret_json.get('data_base')
         redshift_db_user = secret_json.get('username')
         redshift_db_password = secret_json.get('password')
         redshift_db_port = secret_json.get('port')
@@ -49,35 +60,86 @@ def get_secrets_redshift(client_secret, redshift_secrete_name):
 
         print('',"####### Outputs Secrets Manager ##########",
             redshift_db_host, redshift_db_port, sep='\n')
-
     except Exception as e:
         logging.error(e)
         return False
     return [redshift_db_name, redshift_db_user, redshift_db_password, redshift_db_port, redshift_db_host]
 
 
-def give_permissions_database(cur,redshift_db_name, group_loaders, group_transformers):
-    # Permissão para loaders e transformers
-    cur.execute(f'''
-    grant create on database {redshift_db_name} to group {group_loaders};
-    grant create on database {redshift_db_name} to group {group_transformers};
-    grant select on all tables in schema information_schema to group {group_loaders};
-    grant select on all tables in schema pg_catalog to group {group_loaders};
-    grant select on all tables in schema information_schema to group {group_transformers};
-    grant select on all tables in schema pg_catalog to group {group_transformers};
-    ''')
+def create_users_redshift(cur, secret_json):
+    try:
+        # Usuários dos grupos - Falta melhorar essa parte bem hardcode e.e Deus me perdoe, mas é isso aí.
+        loaders = []
+        reporters = []
+        transformers = []
+
+        # Pegando usuários e senhas dos loaders, transformers e reporters
+        for key, value in secret_json.items():
+            if 'loaders' in key:
+                loaders.append(value)
+            elif 'reporters' in key:
+                reporters.append(value)
+            elif 'transformers' in key:
+                transformers.append(value)
+
+        # Gerando novas listas a cada 2 items na lista original
+        loaders = [loaders[i:i+2] for i in range(0, len(loaders), 2)]
+        reporters = [reporters[i:i+2] for i in range(0, len(reporters), 2)]
+        transformers = [transformers[i:i+2] for i in range(0, len(transformers), 2)]
+
+        groups = loaders, reporters, transformers
+        group_names = ["loaders", "reporters", "transformers"]
+
+        # Criação dos grupos
+        for group in group_names:
+            cur.execute(f"CREATE GROUP {group};")
+ 
+        # Criando Usuários com senhas (0=nome do usuário, 1=senha)
+        for group in groups:
+            for user in group:
+                cur.execute(f"create user {user[0]} with password '{user[1]}';")
+               
+        # Adição dos usuários aos grupos
+        for idx, group in enumerate(groups):
+            for idx2, user in enumerate(group):
+                cur.execute(f"alter group {group_names[idx]} add user {user[0]};")
+    except Exception as e:
+        logging.error(e)
+        return False
+
+
+def give_permissions_database(cur, redshift_db_name, groups):
+    try:
+        group_exception = ['reporters']
+        groups_count = group_exception
+
+        # Executando permissão por grupo não presente em 'groups_count'
+        for group in groups.keys():
+            if group not in groups_count:
+                cur.execute(f'''
+                grant create on database {redshift_db_name} to group {group};
+                grant select on all tables in schema information_schema to group {group};
+                grant select on all tables in schema pg_catalog to group {group};
+                ''')
+                groups_count.append(group)
+    except Exception as e:
+        logging.error(e)
+        return False
+
 
 def give_permission_schemas(cur, folders, redshift_db_user, group):
     try:
-    # permissão para as tabelas criadas
-    # Adicionando as permissões USAGE, SELECT
-        for schema in folders:
-            cur.execute(f'''
-            grant usage on schema "{schema}" to group {group};
-            grant select on all tables in schema "{schema}" to group {group};
-            alter default privileges for user {redshift_db_user} in schema "{schema}"
-            grant select on tables to group {group};
-            ''')
+        for key, value in group.items():
+            if value == 2:  # 'loaders':1, 'transformers':2, 'reporters':3
+
+                # Adicionando permissões apenas usuários do grupo 'transformers' e privilégios para um determinado user
+                for schema in folders:
+                    cur.execute(f'''
+                    grant usage on schema "{schema}" to group {key};
+                    grant select on all tables in schema "{schema}" to group {key};
+                    alter default privileges for user {redshift_db_user} in schema "{schema}"
+                    grant select on tables to group {key};
+                    ''')
         return True
     except Exception as e:
         logging.error(e)
@@ -99,11 +161,11 @@ def get_folder(list_objects):
         return False
     #print(folders)
 
+
 def create_schema_redshift(cur, folders, redshift_db_user):
     # Criação da primeira parte do diretório como schema no banco de dados redshift
     try:       
         for schema in folders:
-            # Executa o script de create table
             print('', "####### Comando executado: ##########", sep='\n')
             print(f'CREATE SCHEMA IF NOT EXISTS "{schema}" AUTHORIZATION {redshift_db_user};')
             cur.execute(f'CREATE SCHEMA IF NOT EXISTS "{schema}" AUTHORIZATION {redshift_db_user};') # vai criar a pasta entre "", exemplo: "c&a"
@@ -112,54 +174,104 @@ def create_schema_redshift(cur, folders, redshift_db_user):
         return False
     return True
 
-def csv_to_redshift(cur, s3, bucket_name, list_objects, redshift_details, redshift_db_name):
-#Reading the individual files from the AWS S3 buckets and putting them in dataframes """
-    # 
-    redshift_iam_arn, redshift_secrete_name, redshift_region_name = redshift_details
 
+def csv_column_dtype(csv_dataframe, columns_dataframe):
+    # Identify dtypes, length of columns
+    # List of columns names
+    try:
+        columns = []
+        columns_names = []
+
+        for column_name in columns_dataframe:
+
+            # tratamento dos nomes das colunas com espaço para '_'
+            column_tratament = str(column_name).replace(' ', '_').lower()
+            # reservando column type
+            column_type = csv_dataframe[column_name].dtype
+            # reservando apenas os nomes das colunas
+            columns_names.append(column_tratament)
+
+            if column_type == 'object':
+                # reservando tamanho mãximo da coluna
+                column_len = int(csv_dataframe[column_name].str.len().max())
+                
+                if column_len <= 255:
+                    columns.append(f"{column_tratament} varchar({column_len})")
+                elif column_len > 255:
+                    columns.append(f"{column_tratament} varchar(max)")
+            elif "int" in str(column_type):
+                columns.append(f"{column_tratament} integer")
+            elif "float" in str(column_type):
+                columns.append(f"{column_tratament} float")
+            else:
+                columns.append(f"{column_tratament} varchar(255)")
+        
+        # junção das colunas reservadas
+        columns = "("+', '.join(columns)+""",
+            created_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
+            updated_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP)"""
+        columns_names = "("+', '.join(columns_names)+")"
+
+        print('','Tratamento de colunas finalizado.', sep='\n')
+        print('', "Header_csv para Colunas:", columns, sep='\n')
+        #print('',columns_names, sep='\n')
+
+        return columns, columns_names
+
+    except Exception as e:
+        logging.error(e)
+        return False
+
+
+def csv_identify_delimiter(csv_content):
+    # Identificador de delimitador
+    try:
+        delimiters = [',', '|', '\t', ';']
+        counts = {d: csv_content.count(d) for d in delimiters}
+        delimiter = max(counts, key=counts.get)
+        return delimiter
+
+    except Exception as e:
+        logging.error(e)
+        return False
+
+
+def csv_to_redshift(cur, s3, bucket_name, list_objects, redshift_details, redshift_db_name):
+# Reading the individual files from the AWS S3 buckets and putting them in dataframes
+    redshift_iam_arn, redshift_secrete_name, redshift_region_name = redshift_details
+    
     for file in list_objects:
         obj = s3.Object(bucket_name,file)
-        data=obj.get()['Body'].read()
-        csv_file = pd.read_csv(io.BytesIO(data), header=0, delimiter=";", low_memory=False)
-        csv_header = list(csv_file.columns)
-        
+        data = obj.get()['Body'].read()
+        # Identificando o delimitador
+        delimiter_csv = csv_identify_delimiter(data.decode('utf-8'))
+
+        # Leitura de csv
+        csv_df = pd.read_csv(io.BytesIO(data), header = 0, delimiter = delimiter_csv, low_memory = False)
+        columns_df = csv_df.columns
         print('', '####### Iniciando tratamento csv ... ##########', sep='\n')
-    
-        # criação do schema, tabela e colunas em text
+
+        # resevando nomes dos schemas, tabelas e colunas
         schema = '"'+file.split('/')[0]+'"'
         table = file.split('/')[-1].lower()
         table = table.replace('.csv','').replace('.CSV','')
-        print('','Tratamento de schema e tabela finalizado.', sep='\n')
-        print('', "Pasta para schema: ", schema,'',"Arquivo para tabela: ", table, sep='\n')
+        print('','Tratamento de schema e tabela finalizado.', sep = '\n')
+        print('', "Pasta para schema: ", schema,'',"Arquivo para tabela: ", table, sep = '\n')
 
-        # Criação das colunas com data type varchar(256)
-        column = []
-        column_origin = [] #Somente as colunas sem datatype
-        for column_csv in csv_header:
-            # podemos usar varchar(max)
-            # ATENÇÃO: PODEMOS ADICIONAR COLUNAS ENTRE ASPAS CASO SEJA NECESSÁRIO
-            column.append(column_csv+' varchar(max)')
-            column_origin.append(column_csv)
+        # Tratamento das colunas, identificação de datatype e length
+        columns, columns_names = csv_column_dtype(csv_df, columns_df)
 
-        column="("+', '.join(column)+""",
-         created_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP,
-          updated_at timestamp with time zone NOT NULL DEFAULT CURRENT_TIMESTAMP)"""
-        
-        column_origin="("+', '.join(column_origin)+")"
-        print('','Tratamento de colunas finalizado.', sep='\n')
-        print('', "Header_csv para Colunas:", column, sep='\n')
-
-        # Criação das tabelas com colunas em text
-        cur.execute(f"CREATE TABLE IF NOT EXISTS {redshift_db_name}.{schema}.{table}{column};")
-        print('', "####### Comando executado: ##########", sep='\n')
-        print(f"CREATE TABLE IF NOT EXISTS {redshift_db_name}.{schema}.{table}{column};")
+        # Criação das tabelas e colunas
+        cur.execute(f"CREATE TABLE IF NOT EXISTS {redshift_db_name}.{schema}.{table}{columns};")
+        print('', "####### Comando executado: ##########", sep = '\n')
+        print(f"CREATE TABLE IF NOT EXISTS {redshift_db_name}.{schema}.{table}{columns};")
 
         # Copy CSV do S3 para o Redshift
         cur.execute(f"""
-        copy {schema}.{table} {column_origin}
+        copy {schema}.{table} {columns_names}
         from 's3://{bucket_name}/{file}' 
         iam_role '{redshift_iam_arn}'
-        delimiter ';' 
+        delimiter '{delimiter_csv}' 
         region '{redshift_region_name}'
         IGNOREHEADER 1
         DATEFORMAT AS 'YYYY-MM-DD HH:MI:SS'
