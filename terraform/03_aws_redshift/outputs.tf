@@ -36,3 +36,7 @@ output "region_name" {
 output "secrete_name" {
   value = aws_secretsmanager_secret.rd_secret.name
 }
+
+output "meu_ip" {
+  value = ["${chomp(data.http.meu_ip.response_body)}/32"]
+}

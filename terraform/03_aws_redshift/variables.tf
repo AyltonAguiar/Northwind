@@ -23,3 +23,7 @@ variable "tags" {
   }
 
 }
+
+variable "meu_ip" {
+  default = ""
+}

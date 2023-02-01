@@ -31,7 +31,7 @@ resource "aws_s3_bucket" "remote_state" {
     Description = "Armazenamento do remote state"
     ManagedBy   = "Terraform"
     Owner       = "Aylton Aguiar"
-    CreatedAt   = "2022-11-08"
+    CreatedAt   = "2023-01-18"
   }
 }
 

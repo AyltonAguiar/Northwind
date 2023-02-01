@@ -34,6 +34,11 @@ resource "random_password" "password" {
   override_special = "!$%&*()-_=+[]{}<>:?"
 }
 
+# Data para pegar o IP atual do usuário
+data "http" "meu_ip" {
+  url = "https://ipv4.icanhazip.com"
+}
+
 
 # Data Sources para setar posteriormente o ID padrão da VPC e do security group
 data "aws_vpc" "selected" {
@@ -79,12 +84,14 @@ resource "aws_secretsmanager_secret_version" "rd_secret_version" {
     port = aws_redshift_cluster.cluster_reds.port
     host = aws_redshift_cluster.cluster_reds.endpoint
     dbClusterIdentifier = aws_redshift_cluster.cluster_reds.cluster_identifier
-    dbt_prod = "dbt_prod"
-    dbt_prod_password = random_password.password[1].result
-    dbt_dev = "dbt_dev"
-    dbt_dev_password = random_password.password[2].result
-    looker_user = "looker"
-    looker_password = random_password.password[3].result
+    transformers1 = "dbt_prod"
+    transformers1_password = random_password.password[1].result
+    transformers2 = "dbt_dev"
+    transformers2_password = random_password.password[2].result
+    reporters1 = "looker"
+    reporters1_password = random_password.password[3].result
+    loaders1 = "airbyte"
+    loaders1_password = random_password.password[4].result
   })
 }
 
@@ -96,7 +103,7 @@ resource "aws_security_group_rule" "security_rule" {
   from_port         = 5439
   to_port           = 5439
   protocol          = "tcp"
-  cidr_blocks       = ["186.216.177.214/32"] # meu IP
+  cidr_blocks       = ["${chomp(data.http.meu_ip.response_body)}/32"] # meu IP
   security_group_id = data.aws_security_group.security_group_data.id
 
 }
@@ -193,51 +200,3 @@ resource "aws_redshiftdata_statement" "revoke_users" {
 }
 
 */
-
-# Criação de grupos no redshift
-# exemplo: grupos para o database
-resource "aws_redshiftdata_statement" "groups_database" {
-  for_each = local.groups
-  cluster_identifier = aws_redshift_cluster.cluster_reds.cluster_identifier
-  database           = aws_redshift_cluster.cluster_reds.database_name
-  db_user            = aws_redshift_cluster.cluster_reds.master_username
-  sql                = "CREATE GROUP ${each.key};"
-  lifecycle {
-    ignore_changes = all
-  }
-   depends_on = [
-    aws_redshift_cluster.cluster_reds, aws_redshift_cluster_iam_roles.s3-readonly
-  ]
-}
-
-# Criação de usuários no redshift
-# exemplo: usuários para o database
-resource "aws_redshiftdata_statement" "users_database" {
-  for_each = local.users_groups
-  cluster_identifier = aws_redshift_cluster.cluster_reds.cluster_identifier
-  database           = aws_redshift_cluster.cluster_reds.database_name
-  db_user            = aws_redshift_cluster.cluster_reds.master_username
-  sql                = "create user ${each.key} with password '${random_password.password[each.value].result}';"
-  lifecycle {
-    ignore_changes = all
-  }
-   depends_on = [
-    aws_redshift_cluster.cluster_reds, aws_redshift_cluster_iam_roles.s3-readonly
-  ]
-}
-
-# Criação de adição de usuários aos grupos no redshift
-# exemplo: looker para bi_users, dbt_dev para dbt_users
-resource "aws_redshiftdata_statement" "users_groups_database" {
-  for_each = local.groups_category
-  cluster_identifier = aws_redshift_cluster.cluster_reds.cluster_identifier
-  database           = aws_redshift_cluster.cluster_reds.database_name
-  db_user            = aws_redshift_cluster.cluster_reds.master_username
-  sql                = "alter group ${each.value} add user ${each.key};"
-  lifecycle {
-    ignore_changes = all
-  }
-  depends_on = [
-    aws_redshiftdata_statement.groups_database, aws_redshiftdata_statement.users_database
-  ]
-}

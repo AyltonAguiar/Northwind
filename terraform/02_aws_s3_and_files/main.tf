@@ -9,7 +9,7 @@ terraform {
   required_version = ">= 1.2.0"
 
   backend "s3" {
-    bucket  = "tfstate-531446036269" # ATENÇÃO: MODIFICAR PARA O SEU REMOTE STATE BUCKET GERADO
+    bucket  = "tfstate-923064874851" # ATENÇÃO: MODIFICAR PARA O SEU REMOTE STATE BUCKET GERADO
     key     = "engdados/terraform_remote_state/terraform.tfstate"
     region  = "us-east-1"
     profile = "ayltonaguiar"
