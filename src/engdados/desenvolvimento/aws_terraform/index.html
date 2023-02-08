@@ -1,0 +1,1427 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+        <meta name="description" content="<p> Documentação do Projeto de engenharia de dados. </p>
+<p>Observação: Embora não tenha uma variedade muito grande de ferramentas neste projeto poderei realizar novas adições em um breve futuro </p>">
+      
+      
+        <meta name="author" content="Aylton Aguiar">
+      
+      
+      <link rel="icon" href="../../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.4.2, mkdocs-material-8.3.9">
+    
+    
+      
+        <title>Usando Terraform para provisionar infraestrutura - Projeto Northwind</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../assets/stylesheets/main.1d29e8d0.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.cbb835fc.min.css">
+        
+      
+      
+    
+    
+    
+      
+        
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300i,400,400i,700,700i%7CRoboto+Mono:400,400i,700,700i&display=fallback">
+        <style>:root{--md-text-font:"Roboto";--md-code-font:"Roboto Mono"}</style>
+      
+    
+    
+    <script>__md_scope=new URL("../../../..",location),__md_get=(e,_=localStorage,t=__md_scope)=>JSON.parse(_.getItem(t.pathname+"."+e)),__md_set=(e,_,t=localStorage,a=__md_scope)=>{try{t.setItem(a.pathname+"."+e,JSON.stringify(_))}catch(e){}}</script>
+    
+      
+  
+
+
+  
+  
+
+
+
+    
+    
+  </head>
+  
+  
+    
+    
+      
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="black">
+  
+    
+    
+      <script>var palette=__md_get("__palette");if(palette&&"object"==typeof palette.color)for(var key of Object.keys(palette.color))document.body.setAttribute("data-md-color-"+key,palette.color[key])</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#terraform" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+    
+      
+
+  
+
+<header class="md-header md-header--lifted" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../.." title="Projeto Northwind" class="md-header__button md-logo" aria-label="Projeto Northwind" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M448 80v48c0 44.2-100.3 80-224 80S0 172.2 0 128V80C0 35.82 100.3 0 224 0s224 35.82 224 80zm-54.8 134.7c19.9-7.4 39.9-16.9 54.8-28.6V288c0 44.2-100.3 80-224 80S0 332.2 0 288V186.1c14.93 11.7 34.02 21.2 54.85 28.6C99.66 230.7 159.5 240 224 240s124.3-9.3 169.2-25.3zm-338.35 160C99.66 390.7 159.5 400 224 400s124.3-9.3 169.2-25.3c19.9-7.4 39.9-16.9 54.8-28.6V432c0 44.2-100.3 80-224 80S0 476.2 0 432v-85.9c14.93 11.7 34.02 21.2 54.85 28.6z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2Z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            Projeto Northwind
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Usando Terraform para provisionar infraestrutura
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+      <form class="md-header__option" data-md-component="palette">
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="default" data-md-color-primary="black" data-md-color-accent="black"  aria-label="Switch to dark mode"  type="radio" name="__palette" id="__palette_1">
+          
+            <label class="md-header__button md-icon" title="Switch to dark mode" for="__palette_2" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a4 4 0 0 0-4 4 4 4 0 0 0 4 4 4 4 0 0 0 4-4 4 4 0 0 0-4-4m0 10a6 6 0 0 1-6-6 6 6 0 0 1 6-6 6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+            </label>
+          
+        
+          
+          
+          <input class="md-option" data-md-color-media="" data-md-color-scheme="slate" data-md-color-primary="black" data-md-color-accent="black"  aria-label="Switch to light mode"  type="radio" name="__palette" id="__palette_2">
+          
+            <label class="md-header__button md-icon" title="Switch to light mode" for="__palette_1" hidden>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 18c-.89 0-1.74-.2-2.5-.55C11.56 16.5 13 14.42 13 12c0-2.42-1.44-4.5-3.5-5.45C10.26 6.2 11.11 6 12 6a6 6 0 0 1 6 6 6 6 0 0 1-6 6m8-9.31V4h-4.69L12 .69 8.69 4H4v4.69L.69 12 4 15.31V20h4.69L12 23.31 15.31 20H20v-4.69L23.31 12 20 8.69Z"/></svg>
+            </label>
+          
+        
+      </form>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+      </label>
+      <div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5Z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+          <a href="javascript:void(0)" class="md-search__icon md-icon" aria-label="Share" data-clipboard data-clipboard-text="" data-md-component="search-share" tabindex="-1">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M18 16.08c-.76 0-1.44.3-1.96.77L8.91 12.7c.05-.23.09-.46.09-.7 0-.24-.04-.47-.09-.7l7.05-4.11c.54.5 1.25.81 2.04.81a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3c0 .24.04.47.09.7L8.04 9.81C7.5 9.31 6.79 9 6 9a3 3 0 0 0-3 3 3 3 0 0 0 3 3c.79 0 1.5-.31 2.04-.81l7.12 4.15c-.05.21-.08.43-.08.66 0 1.61 1.31 2.91 2.92 2.91 1.61 0 2.92-1.3 2.92-2.91A2.92 2.92 0 0 0 18 16.08Z"/></svg>
+          </a>
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41Z"/></svg>
+        </button>
+      </nav>
+      
+        <div class="md-search__suggest" data-md-component="search-suggest"></div>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        <a href="https://github.com/AyltonAguiar/northwind" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    AyltonAguiar/northwind
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+    
+      
+<nav class="md-tabs" aria-label="Tabs" data-md-component="tabs">
+  <div class="md-tabs__inner md-grid">
+    <ul class="md-tabs__list">
+      
+        
+  
+  
+
+
+  <li class="md-tabs__item">
+    <a href="../../../.." class="md-tabs__link">
+      Início
+    </a>
+  </li>
+
+      
+        
+  
+  
+    
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../" class="md-tabs__link md-tabs__link--active">
+        Projeto Northwind
+      </a>
+    </li>
+  
+
+      
+        
+  
+  
+
+
+  
+  
+  
+    <li class="md-tabs__item">
+      <a href="../../../documentacao/iniciando/" class="md-tabs__link">
+        Como documentar?
+      </a>
+    </li>
+  
+
+      
+    </ul>
+  </div>
+</nav>
+    
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+  
+
+
+<nav class="md-nav md-nav--primary md-nav--lifted" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../.." title="Projeto Northwind" class="md-nav__button md-logo" aria-label="Projeto Northwind" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M448 80v48c0 44.2-100.3 80-224 80S0 172.2 0 128V80C0 35.82 100.3 0 224 0s224 35.82 224 80zm-54.8 134.7c19.9-7.4 39.9-16.9 54.8-28.6V288c0 44.2-100.3 80-224 80S0 332.2 0 288V186.1c14.93 11.7 34.02 21.2 54.85 28.6C99.66 230.7 159.5 240 224 240s124.3-9.3 169.2-25.3zm-338.35 160C99.66 390.7 159.5 400 224 400s124.3-9.3 169.2-25.3c19.9-7.4 39.9-16.9 54.8-28.6V432c0 44.2-100.3 80-224 80S0 476.2 0 432v-85.9c14.93 11.7 34.02 21.2 54.85 28.6z"/></svg>
+
+    </a>
+    Projeto Northwind
+  </label>
+  
+    <div class="md-nav__source">
+      <a href="https://github.com/AyltonAguiar/northwind" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    AyltonAguiar/northwind
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../.." class="md-nav__link">
+        Início
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2" type="checkbox" id="__nav_2" checked>
+      
+      
+      
+        
+          
+            
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        
+        
+        <div class="md-nav__link md-nav__link--index ">
+          <a href="../../">Projeto Northwind</a>
+          
+            <label for="__nav_2">
+              <span class="md-nav__icon md-icon"></span>
+            </label>
+          
+        </div>
+      
+      <nav class="md-nav" aria-label="Projeto Northwind" data-md-level="1">
+        <label class="md-nav__title" for="__nav_2">
+          <span class="md-nav__icon md-icon"></span>
+          Projeto Northwind
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../introducao/" class="md-nav__link">
+        Introdução
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../prerequisitos/" class="md-nav__link">
+        Pré-Requisitos
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../arquitetura/arquitetura/" class="md-nav__link">
+        Arquitetura
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_2_5" type="checkbox" id="__nav_2_5" checked>
+      
+      
+      
+        
+          
+            
+          
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        
+        
+        <div class="md-nav__link md-nav__link--index ">
+          <a href="../">Desenvolvimento</a>
+          
+            <label for="__nav_2_5">
+              <span class="md-nav__icon md-icon"></span>
+            </label>
+          
+        </div>
+      
+      <nav class="md-nav" aria-label="Desenvolvimento" data-md-level="2">
+        <label class="md-nav__title" for="__nav_2_5">
+          <span class="md-nav__icon md-icon"></span>
+          Desenvolvimento
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Usando Terraform para provisionar infraestrutura
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Usando Terraform para provisionar infraestrutura
+      </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#create_remote_state" class="md-nav__link">
+    Provisionando remote state no S3
+  </a>
+  
+    <nav class="md-nav" aria-label="Provisionando remote state no S3">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#recursos-provisionados" class="md-nav__link">
+    Recursos provisionados
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#order_execute" class="md-nav__link">
+    Ordem da execução dos comandos
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create_bucket" class="md-nav__link">
+    Provisionando bucket S3 com arquivos
+  </a>
+  
+    <nav class="md-nav" aria-label="Provisionando bucket S3 com arquivos">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#recursos-provisionados_1" class="md-nav__link">
+    Recursos provisionados
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ordem-da-execucao-dos-comandos" class="md-nav__link">
+    Ordem da execução dos comandos
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create_cluster_redshift" class="md-nav__link">
+    Provisionando Redshift e outros recursos necessários.
+  </a>
+  
+    <nav class="md-nav" aria-label="Provisionando Redshift e outros recursos necessários.">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#criacao-cluster-redshift" class="md-nav__link">
+    Criação Cluster Redshift
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adição-de-entrada-cidr" class="md-nav__link">
+    Adição de entrada CIDR
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#criação-de-usuários-grupos-e-adição-de-usuário-ao-grupo" class="md-nav__link">
+    Criação de usuários, grupos e adição de usuário ao grupo
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#salvando-usuários-e-senhas-no-secret-manager" class="md-nav__link">
+    Salvando usuários e senhas no Secret Manager
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recursos-provisionados_2" class="md-nav__link">
+    Recursos provisionados
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ordem-da-execucao-dos-comandos_1" class="md-nav__link">
+    Ordem da execução dos comandos
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extra-comandos" class="md-nav__link">
+    [Extra] Comandos
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#check-objetivos" class="md-nav__link">
+     Check Objetivos
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../python/" class="md-nav__link">
+        Usando Python para automatizar
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../dbt/" class="md-nav__link">
+        Utilizando Dbt cloud
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../desenvolvimento_lookerstudio/" class="md-nav__link">
+        Utilizando Looker Studio
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../referencias/" class="md-nav__link">
+        Referências
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle md-toggle--indeterminate" data-md-toggle="__nav_3" type="checkbox" id="__nav_3" checked>
+      
+      
+      
+        
+          
+        
+          
+        
+          
+        
+          
+        
+      
+      
+        <label class="md-nav__link" for="__nav_3">
+          Como documentar?
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Como documentar?" data-md-level="1">
+        <label class="md-nav__title" for="__nav_3">
+          <span class="md-nav__icon md-icon"></span>
+          Como documentar?
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../documentacao/iniciando/" class="md-nav__link">
+        Iniciando
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../documentacao/arquitetura/" class="md-nav__link">
+        Arquitetura
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../documentacao/publicacao-mkdocs/" class="md-nav__link">
+        Publicando Mkdocs
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../documentacao/referencias/" class="md-nav__link">
+        Referências
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#create_remote_state" class="md-nav__link">
+    Provisionando remote state no S3
+  </a>
+  
+    <nav class="md-nav" aria-label="Provisionando remote state no S3">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#recursos-provisionados" class="md-nav__link">
+    Recursos provisionados
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#order_execute" class="md-nav__link">
+    Ordem da execução dos comandos
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create_bucket" class="md-nav__link">
+    Provisionando bucket S3 com arquivos
+  </a>
+  
+    <nav class="md-nav" aria-label="Provisionando bucket S3 com arquivos">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#recursos-provisionados_1" class="md-nav__link">
+    Recursos provisionados
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ordem-da-execucao-dos-comandos" class="md-nav__link">
+    Ordem da execução dos comandos
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#create_cluster_redshift" class="md-nav__link">
+    Provisionando Redshift e outros recursos necessários.
+  </a>
+  
+    <nav class="md-nav" aria-label="Provisionando Redshift e outros recursos necessários.">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#criacao-cluster-redshift" class="md-nav__link">
+    Criação Cluster Redshift
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#adição-de-entrada-cidr" class="md-nav__link">
+    Adição de entrada CIDR
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#criação-de-usuários-grupos-e-adição-de-usuário-ao-grupo" class="md-nav__link">
+    Criação de usuários, grupos e adição de usuário ao grupo
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#salvando-usuários-e-senhas-no-secret-manager" class="md-nav__link">
+    Salvando usuários e senhas no Secret Manager
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#recursos-provisionados_2" class="md-nav__link">
+    Recursos provisionados
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#ordem-da-execucao-dos-comandos_1" class="md-nav__link">
+    Ordem da execução dos comandos
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#extra-comandos" class="md-nav__link">
+    [Extra] Comandos
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#check-objetivos" class="md-nav__link">
+     Check Objetivos
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+  <a href="https://github.com/AyltonAguiar/northwind/edit/master/docs/src/engdados/desenvolvimento/aws_terraform.md" title="Edit this page" class="md-content__button md-icon">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25Z"/></svg>
+  </a>
+
+
+
+<h1 id="terraform"><strong>Terraform</strong><a class="headerlink" href="#terraform" title="Permanent link">&para;</a></h1>
+<h2 id="create_remote_state"><strong>Provisionando remote state no S3</strong><a class="headerlink" href="#create_remote_state" title="Permanent link">&para;</a></h2>
+<p>No Script requisitamos o ID da conta AWS utilizando o <strong>profile</strong> e <strong>region</strong> para poder criar o bucket com Id único. Adicionamos tags, versionamento e acl private ao provisionamento do bucket S3.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="1:1"><input checked="checked" id="__tabbed_1_1" name="__tabbed_1" type="radio" /><div class="tabbed-labels"><label for="__tabbed_1_1"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4 1.75C4 .784 4.784 0 5.75 0h5.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v8.586A1.75 1.75 0 0 1 14.25 15h-9a.75.75 0 0 1 0-1.5h9a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 10 4.25V1.5H5.75a.25.25 0 0 0-.25.25v2.5a.75.75 0 0 1-1.5 0v-2.5zm7.5-.188V4.25c0 .138.112.25.25.25h2.688a.252.252 0 0 0-.011-.013l-2.914-2.914a.272.272 0 0 0-.013-.011zM5.72 6.72a.75.75 0 0 0 0 1.06l1.47 1.47-1.47 1.47a.75.75 0 1 0 1.06 1.06l2-2a.75.75 0 0 0 0-1.06l-2-2a.75.75 0 0 0-1.06 0zM3.28 7.78a.75.75 0 0 0-1.06-1.06l-2 2a.75.75 0 0 0 0 1.06l2 2a.75.75 0 0 0 1.06-1.06L1.81 9.25l1.47-1.47z"/></svg></span> <code>main.tf</code></label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="l l-Scalar l-Scalar-Plain">terraform\01_terraform_remote_state\main.tf</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<h3 id="recursos-provisionados"><em>Recursos provisionados</em><a class="headerlink" href="#recursos-provisionados" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Recursos do Provedor</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>aws_s3_bucket</code></td>
+<td>Fornece um recurso de bucket do S3</td>
+</tr>
+<tr>
+<td><code>aws_s3_bucket_acl</code></td>
+<td>Configuração de ACL no bucket</td>
+</tr>
+<tr>
+<td><code>aws_s3_bucket_versioning</code></td>
+<td>Configuração de versionamento no bucket</td>
+</tr>
+</tbody>
+</table>
+<h3 id="order_execute"><em>Ordem da execução dos comandos</em><a class="headerlink" href="#order_execute" title="Permanent link">&para;</a></h3>
+<p>Abaixo clique em expandir para visualizar a ordem da execução dos comandos caso necessite. <mark>A mesma ordem será utilizada nos demais tópicos.</mark></p>
+<ol>
+<li>Inicializando a configuração do Terraform
+<div class="highlight"><pre><span></span><code><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a>terraform init
+</code></pre></div></li>
+<li>Validando sua configuração
+<div class="highlight"><pre><span></span><code><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a>terraform validate
+</code></pre></div></li>
+<li>Executando um plano de criação
+<div class="highlight"><pre><span></span><code><a id="__codelineno-3-1" name="__codelineno-3-1" href="#__codelineno-3-1"></a>terraform plan
+</code></pre></div></li>
+<li>Após revisar o plano de criação, vamos aplicar e aprovar a execução automaticamente
+<div class="highlight"><pre><span></span><code><a id="__codelineno-4-1" name="__codelineno-4-1" href="#__codelineno-4-1"></a>terraform apply -auto-approve
+</code></pre></div></li>
+</ol>
+<h2 id="create_bucket"><strong>Provisionando bucket S3 com arquivos</strong><a class="headerlink" href="#create_bucket" title="Permanent link">&para;</a></h2>
+<p>Provisionamento do bucket S3 com adição de arquivos em csv e um jpg. É utlizado <b> backend </b> e <b> module </b> no script main.
+O S3 contém ciclo de vida, versionamento, ACL e adição de objetos.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="2:1"><input checked="checked" id="__tabbed_2_1" name="__tabbed_2" type="radio" /><div class="tabbed-labels"><label for="__tabbed_2_1"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4 1.75C4 .784 4.784 0 5.75 0h5.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v8.586A1.75 1.75 0 0 1 14.25 15h-9a.75.75 0 0 1 0-1.5h9a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 10 4.25V1.5H5.75a.25.25 0 0 0-.25.25v2.5a.75.75 0 0 1-1.5 0v-2.5zm7.5-.188V4.25c0 .138.112.25.25.25h2.688a.252.252 0 0 0-.011-.013l-2.914-2.914a.272.272 0 0 0-.013-.011zM5.72 6.72a.75.75 0 0 0 0 1.06l1.47 1.47-1.47 1.47a.75.75 0 1 0 1.06 1.06l2-2a.75.75 0 0 0 0-1.06l-2-2a.75.75 0 0 0-1.06 0zM3.28 7.78a.75.75 0 0 0-1.06-1.06l-2 2a.75.75 0 0 0 0 1.06l2 2a.75.75 0 0 0 1.06-1.06L1.81 9.25l1.47-1.47z"/></svg></span> <code>main.tf</code></label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><a id="__codelineno-5-1" name="__codelineno-5-1" href="#__codelineno-5-1"></a><span class="l l-Scalar l-Scalar-Plain">terraform\02_aws_s3_and_files\main.tf</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<h3 id="recursos-provisionados_1"><em>Recursos provisionados</em><a class="headerlink" href="#recursos-provisionados_1" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Recursos do Provedor</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>aws_s3_bucket</code></td>
+<td>Esta funcionalidade é para gerenciar o S3 em uma<br> partição AWS</td>
+</tr>
+<tr>
+<td><code>aws_s3_bucket_acl</code></td>
+<td>Fornece um recurso de ACL de bucket do S3</td>
+</tr>
+<tr>
+<td><code>aws_s3_bucket_lifecycle_configuration</code></td>
+<td>Fornece um recurso de configuração independente para a configuração do ciclo de vida do bucket do S3</td>
+</tr>
+<tr>
+<td><del><code>aws_s3_bucket_metric</code></del></td>
+<td><del>Fornece um recurso de configuração de métricas de bucket do S3</del></td>
+</tr>
+<tr>
+<td><code>aws_s3_bucket_versioning</code></td>
+<td>Fornece um recurso para controlar o controle de versão em um bucket do S3</td>
+</tr>
+<tr>
+<td><code>aws_s3_object</code></td>
+<td>Fornece um recurso de objeto S3</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th align="left">Recursos Terraform</th>
+<th align="left">Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left"><code>random_pet</code></td>
+<td align="left">Gera nomes de animais aleatórios que podem ser<br> usados como identificadores exclusivos para outros recursos</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ordem-da-execucao-dos-comandos"><em>Ordem da execução dos comandos</em><a class="headerlink" href="#ordem-da-execucao-dos-comandos" title="Permanent link">&para;</a></h3>
+<p><a href="#order_execute">Clique aqui para ir na ordem dos comandos</a></p>
+<h2 id="create_cluster_redshift"><strong>Provisionando Redshift e outros recursos necessários.</strong><a class="headerlink" href="#create_cluster_redshift" title="Permanent link">&para;</a></h2>
+<p>O script possui a criação do cluster Redshift, criação de usuários e grupos para Redshift, adição de role e policy, criação de secrets manager com adição de informações criadas no processo para não utilizar as senhas diretamente no código, adição de IP'S para acesso aos recursos provisionados.</p>
+<p><mark>Pontuarei apenas algumas partes que precisam de modificações:</mark></p>
+<div class="tabbed-set tabbed-alternate" data-tabs="3:1"><input checked="checked" id="__tabbed_3_1" name="__tabbed_3" type="radio" /><div class="tabbed-labels"><label for="__tabbed_3_1"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M4 1.75C4 .784 4.784 0 5.75 0h5.586c.464 0 .909.184 1.237.513l2.914 2.914c.329.328.513.773.513 1.237v8.586A1.75 1.75 0 0 1 14.25 15h-9a.75.75 0 0 1 0-1.5h9a.25.25 0 0 0 .25-.25V6h-2.75A1.75 1.75 0 0 1 10 4.25V1.5H5.75a.25.25 0 0 0-.25.25v2.5a.75.75 0 0 1-1.5 0v-2.5zm7.5-.188V4.25c0 .138.112.25.25.25h2.688a.252.252 0 0 0-.011-.013l-2.914-2.914a.272.272 0 0 0-.013-.011zM5.72 6.72a.75.75 0 0 0 0 1.06l1.47 1.47-1.47 1.47a.75.75 0 1 0 1.06 1.06l2-2a.75.75 0 0 0 0-1.06l-2-2a.75.75 0 0 0-1.06 0zM3.28 7.78a.75.75 0 0 0-1.06-1.06l-2 2a.75.75 0 0 0 0 1.06l2 2a.75.75 0 0 0 1.06-1.06L1.81 9.25l1.47-1.47z"/></svg></span> <code>main.tf</code></label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><a id="__codelineno-6-1" name="__codelineno-6-1" href="#__codelineno-6-1"></a><span class="l l-Scalar l-Scalar-Plain">terraform\03_terraform_remote_state\main.tf</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<h3 id="criacao-cluster-redshift"><strong><em>Criação Cluster Redshift</em></strong><a class="headerlink" href="#criacao-cluster-redshift" title="Permanent link">&para;</a></h3>
+<p>Esse cluster atende as caracteristicas do modelo free tier, caso esteja dentro do prazo.
+Pode-se modificar <code>master_username</code> e <code>database_name</code>.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-7-1" name="__codelineno-7-1" href="#__codelineno-7-1"></a><span class="err">resource</span><span class="w"> </span><span class="s2">&quot;aws_redshift_cluster&quot;</span><span class="w"> </span><span class="s2">&quot;cluster_reds&quot;</span><span class="w"> </span>
+<a id="__codelineno-7-2" name="__codelineno-7-2" href="#__codelineno-7-2"></a><span class="p">{</span>
+<a id="__codelineno-7-3" name="__codelineno-7-3" href="#__codelineno-7-3"></a><span class="w">  </span><span class="err">clus</span><span class="kc">ter</span><span class="err">_ide</span><span class="kc">nt</span><span class="err">i</span><span class="kc">f</span><span class="err">ier</span><span class="w">  </span><span class="err">=</span><span class="w"> </span><span class="err">ra</span><span class="kc">n</span><span class="err">dom_pe</span><span class="kc">t</span><span class="err">.</span><span class="kc">t</span><span class="err">his.id</span>
+<a id="__codelineno-7-4" name="__codelineno-7-4" href="#__codelineno-7-4"></a><span class="w">  </span><span class="err">da</span><span class="kc">ta</span><span class="err">base_</span><span class="kc">na</span><span class="err">me</span><span class="w">       </span><span class="err">=</span><span class="w"> </span><span class="s2">&quot;northwind&quot;</span>
+<a id="__codelineno-7-5" name="__codelineno-7-5" href="#__codelineno-7-5"></a><span class="w">  </span><span class="err">mas</span><span class="kc">ter</span><span class="err">_user</span><span class="kc">na</span><span class="err">me</span><span class="w">     </span><span class="err">=</span><span class="w"> </span><span class="s2">&quot;aylton&quot;</span>
+<a id="__codelineno-7-6" name="__codelineno-7-6" href="#__codelineno-7-6"></a><span class="w">  </span><span class="err">mas</span><span class="kc">ter</span><span class="err">_password</span><span class="w">     </span><span class="err">=</span><span class="w"> </span><span class="err">ra</span><span class="kc">n</span><span class="err">dom_password.password</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="err">.resul</span><span class="kc">t</span>
+<a id="__codelineno-7-7" name="__codelineno-7-7" href="#__codelineno-7-7"></a><span class="w">  </span><span class="err">por</span><span class="kc">t</span><span class="w">                </span><span class="err">=</span><span class="w"> </span><span class="mi">5439</span>
+<a id="__codelineno-7-8" name="__codelineno-7-8" href="#__codelineno-7-8"></a><span class="w">  </span><span class="kc">n</span><span class="err">ode_</span><span class="kc">t</span><span class="err">ype</span><span class="w">           </span><span class="err">=</span><span class="w"> </span><span class="s2">&quot;dc2.large&quot;</span>
+<a id="__codelineno-7-9" name="__codelineno-7-9" href="#__codelineno-7-9"></a><span class="w">  </span><span class="err">clus</span><span class="kc">ter</span><span class="err">_</span><span class="kc">t</span><span class="err">ype</span><span class="w">        </span><span class="err">=</span><span class="w"> </span><span class="s2">&quot;single-node&quot;</span>
+<a id="__codelineno-7-10" name="__codelineno-7-10" href="#__codelineno-7-10"></a><span class="w">  </span><span class="err">publicly_accessible</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="kc">true</span>
+<a id="__codelineno-7-11" name="__codelineno-7-11" href="#__codelineno-7-11"></a><span class="w">  </span><span class="err">apply_immedia</span><span class="kc">tel</span><span class="err">y</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="err">Necessário</span><span class="w"> </span><span class="err">para</span><span class="w"> </span><span class="err">des</span><span class="kc">tr</span><span class="err">oy</span><span class="w"> </span><span class="err">do</span><span class="w"> </span><span class="err">clus</span><span class="kc">ter</span><span class="w"> </span><span class="err">qua</span><span class="kc">n</span><span class="err">do</span><span class="w"> </span><span class="kc">t</span><span class="err">iver</span><span class="w"> </span><span class="err">s</span><span class="kc">na</span><span class="err">psho</span><span class="kc">t</span>
+<a id="__codelineno-7-12" name="__codelineno-7-12" href="#__codelineno-7-12"></a><span class="w">  </span><span class="err">skip_</span><span class="kc">f</span><span class="err">i</span><span class="kc">nal</span><span class="err">_s</span><span class="kc">na</span><span class="err">psho</span><span class="kc">t</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="kc">true</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="err">Necessário</span><span class="w"> </span><span class="err">para</span><span class="w"> </span><span class="err">des</span><span class="kc">tr</span><span class="err">oy</span><span class="w"> </span><span class="err">do</span><span class="w"> </span><span class="err">clus</span><span class="kc">ter</span><span class="w"> </span><span class="err">qua</span><span class="kc">n</span><span class="err">do</span><span class="w"> </span><span class="kc">t</span><span class="err">iver</span><span class="w"> </span><span class="err">s</span><span class="kc">na</span><span class="err">psho</span><span class="kc">t</span>
+<a id="__codelineno-7-13" name="__codelineno-7-13" href="#__codelineno-7-13"></a><span class="w">  </span><span class="kc">ta</span><span class="err">gs</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">var.</span><span class="kc">ta</span><span class="err">gs</span>
+<a id="__codelineno-7-14" name="__codelineno-7-14" href="#__codelineno-7-14"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="adição-de-entrada-cidr"><strong><em>Adição de entrada CIDR</em></strong><a class="headerlink" href="#adição-de-entrada-cidr" title="Permanent link">&para;</a></h3>
+<p>Foram criadas 3 adições de CIDR: Meu IP, Entrada para o dbt e Entrada do Looker Studio. E
+Faça alteração para seu IP, sem ele você não conseguirá realizar operações futuras.
+Pode-se modificar <code>description</code> e <code>cidr_blocks</code>.</p>
+<div class="tabbed-set tabbed-alternate" data-tabs="4:3"><input checked="checked" id="__tabbed_4_1" name="__tabbed_4" type="radio" /><input id="__tabbed_4_2" name="__tabbed_4" type="radio" /><input id="__tabbed_4_3" name="__tabbed_4" type="radio" /><div class="tabbed-labels"><label for="__tabbed_4_1"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M8.78 4.97a.75.75 0 0 1 0 1.06L2.81 12l5.97 5.97a.75.75 0 1 1-1.06 1.06l-6.5-6.5a.75.75 0 0 1 0-1.06l6.5-6.5a.75.75 0 0 1 1.06 0zm6.44 0a.75.75 0 0 0 0 1.06L21.19 12l-5.97 5.97a.75.75 0 1 0 1.06 1.06l6.5-6.5a.75.75 0 0 0 0-1.06l-6.5-6.5a.75.75 0 0 0-1.06 0z"/></svg></span> <code>"security_rule"</code></label><label for="__tabbed_4_2"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M8.78 4.97a.75.75 0 0 1 0 1.06L2.81 12l5.97 5.97a.75.75 0 1 1-1.06 1.06l-6.5-6.5a.75.75 0 0 1 0-1.06l6.5-6.5a.75.75 0 0 1 1.06 0zm6.44 0a.75.75 0 0 0 0 1.06L21.19 12l-5.97 5.97a.75.75 0 1 0 1.06 1.06l6.5-6.5a.75.75 0 0 0 0-1.06l-6.5-6.5a.75.75 0 0 0-1.06 0z"/></svg></span> <code>"security_rule_dbt"</code></label><label for="__tabbed_4_3"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M8.78 4.97a.75.75 0 0 1 0 1.06L2.81 12l5.97 5.97a.75.75 0 1 1-1.06 1.06l-6.5-6.5a.75.75 0 0 1 0-1.06l6.5-6.5a.75.75 0 0 1 1.06 0zm6.44 0a.75.75 0 0 0 0 1.06L21.19 12l-5.97 5.97a.75.75 0 1 0 1.06 1.06l6.5-6.5a.75.75 0 0 0 0-1.06l-6.5-6.5a.75.75 0 0 0-1.06 0z"/></svg></span> <code>"security_rule_lookerstudio"</code></label></div>
+<div class="tabbed-content">
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><a id="__codelineno-8-1" name="__codelineno-8-1" href="#__codelineno-8-1"></a><span class="err">resource</span><span class="w"> </span><span class="s2">&quot;aws_security_group_rule&quot;</span><span class="w"> </span><span class="s2">&quot;security_rule&quot;</span>
+<a id="__codelineno-8-2" name="__codelineno-8-2" href="#__codelineno-8-2"></a><span class="p">{</span>
+<a id="__codelineno-8-3" name="__codelineno-8-3" href="#__codelineno-8-3"></a><span class="err">descrip</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="w">       </span><span class="err">=</span><span class="w"> </span><span class="s2">&quot;Redshift Aylton&quot;</span>
+<a id="__codelineno-8-4" name="__codelineno-8-4" href="#__codelineno-8-4"></a><span class="kc">t</span><span class="err">ype</span><span class="w">              </span><span class="err">=</span><span class="w"> </span><span class="s2">&quot;ingress&quot;</span>
+<a id="__codelineno-8-5" name="__codelineno-8-5" href="#__codelineno-8-5"></a><span class="kc">fr</span><span class="err">om_por</span><span class="kc">t</span><span class="w">         </span><span class="err">=</span><span class="w"> </span><span class="mi">5439</span>
+<a id="__codelineno-8-6" name="__codelineno-8-6" href="#__codelineno-8-6"></a><span class="kc">t</span><span class="err">o_por</span><span class="kc">t</span><span class="w">           </span><span class="err">=</span><span class="w"> </span><span class="mi">5439</span>
+<a id="__codelineno-8-7" name="__codelineno-8-7" href="#__codelineno-8-7"></a><span class="err">pro</span><span class="kc">t</span><span class="err">ocol</span><span class="w">          </span><span class="err">=</span><span class="w"> </span><span class="s2">&quot;tcp&quot;</span>
+<a id="__codelineno-8-8" name="__codelineno-8-8" href="#__codelineno-8-8"></a><span class="err">cidr_blocks</span><span class="w">       </span><span class="err">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;${chomp(data.http.meu_ip.response_body)}/32&quot;</span><span class="p">]</span><span class="w"> </span><span class="err">#</span><span class="w"> </span><span class="err">meu</span><span class="w"> </span><span class="err">IP</span>
+<a id="__codelineno-8-9" name="__codelineno-8-9" href="#__codelineno-8-9"></a><span class="err">securi</span><span class="kc">t</span><span class="err">y_group_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">da</span><span class="kc">ta</span><span class="err">.aws_securi</span><span class="kc">t</span><span class="err">y_group.securi</span><span class="kc">t</span><span class="err">y_group_da</span><span class="kc">ta</span><span class="err">.id</span>
+<a id="__codelineno-8-10" name="__codelineno-8-10" href="#__codelineno-8-10"></a><span class="p">}</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><a id="__codelineno-9-1" name="__codelineno-9-1" href="#__codelineno-9-1"></a><span class="err">resource</span><span class="w"> </span><span class="s2">&quot;aws_security_group_rule&quot;</span><span class="w"> </span><span class="s2">&quot;security_rule_dbt&quot;</span>
+<a id="__codelineno-9-2" name="__codelineno-9-2" href="#__codelineno-9-2"></a><span class="p">{</span>
+<a id="__codelineno-9-3" name="__codelineno-9-3" href="#__codelineno-9-3"></a><span class="w">  </span><span class="err">descrip</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="w">       </span><span class="err">=</span><span class="w"> </span><span class="s2">&quot;DBT 52.45&quot;</span>
+<a id="__codelineno-9-4" name="__codelineno-9-4" href="#__codelineno-9-4"></a><span class="w">  </span><span class="kc">t</span><span class="err">ype</span><span class="w">              </span><span class="err">=</span><span class="w"> </span><span class="s2">&quot;ingress&quot;</span>
+<a id="__codelineno-9-5" name="__codelineno-9-5" href="#__codelineno-9-5"></a><span class="w">  </span><span class="kc">fr</span><span class="err">om_por</span><span class="kc">t</span><span class="w">         </span><span class="err">=</span><span class="w"> </span><span class="mi">5439</span>
+<a id="__codelineno-9-6" name="__codelineno-9-6" href="#__codelineno-9-6"></a><span class="w">  </span><span class="kc">t</span><span class="err">o_por</span><span class="kc">t</span><span class="w">           </span><span class="err">=</span><span class="w"> </span><span class="mi">5439</span>
+<a id="__codelineno-9-7" name="__codelineno-9-7" href="#__codelineno-9-7"></a><span class="w">  </span><span class="err">pro</span><span class="kc">t</span><span class="err">ocol</span><span class="w">          </span><span class="err">=</span><span class="w"> </span><span class="s2">&quot;tcp&quot;</span>
+<a id="__codelineno-9-8" name="__codelineno-9-8" href="#__codelineno-9-8"></a><span class="w">  </span><span class="err">cidr_blocks</span><span class="w">       </span><span class="err">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;52.45.144.63/32&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;54.81.134.249/32&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;52.22.161.231/32&quot;</span><span class="p">]</span><span class="w"> </span><span class="err">#</span><span class="w"> </span><span class="err">IP</span><span class="w"> </span><span class="err">db</span><span class="kc">t</span>
+<a id="__codelineno-9-9" name="__codelineno-9-9" href="#__codelineno-9-9"></a><span class="w">  </span><span class="err">securi</span><span class="kc">t</span><span class="err">y_group_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">da</span><span class="kc">ta</span><span class="err">.aws_securi</span><span class="kc">t</span><span class="err">y_group.securi</span><span class="kc">t</span><span class="err">y_group_da</span><span class="kc">ta</span><span class="err">.id</span>
+<a id="__codelineno-9-10" name="__codelineno-9-10" href="#__codelineno-9-10"></a><span class="p">}</span>
+</code></pre></div>
+</div>
+<div class="tabbed-block">
+<div class="highlight"><pre><span></span><code><a id="__codelineno-10-1" name="__codelineno-10-1" href="#__codelineno-10-1"></a><span class="err">resource</span><span class="w"> </span><span class="s2">&quot;aws_security_group_rule&quot;</span><span class="w"> </span><span class="s2">&quot;security_rule_lookerstudio&quot;</span>
+<a id="__codelineno-10-2" name="__codelineno-10-2" href="#__codelineno-10-2"></a><span class="p">{</span>
+<a id="__codelineno-10-3" name="__codelineno-10-3" href="#__codelineno-10-3"></a><span class="w">  </span><span class="err">descrip</span><span class="kc">t</span><span class="err">io</span><span class="kc">n</span><span class="w">       </span><span class="err">=</span><span class="w"> </span><span class="s2">&quot;looker_studio&quot;</span>
+<a id="__codelineno-10-4" name="__codelineno-10-4" href="#__codelineno-10-4"></a><span class="w">  </span><span class="kc">t</span><span class="err">ype</span><span class="w">              </span><span class="err">=</span><span class="w"> </span><span class="s2">&quot;ingress&quot;</span>
+<a id="__codelineno-10-5" name="__codelineno-10-5" href="#__codelineno-10-5"></a><span class="w">  </span><span class="kc">fr</span><span class="err">om_por</span><span class="kc">t</span><span class="w">         </span><span class="err">=</span><span class="w"> </span><span class="mi">5439</span>
+<a id="__codelineno-10-6" name="__codelineno-10-6" href="#__codelineno-10-6"></a><span class="w">  </span><span class="kc">t</span><span class="err">o_por</span><span class="kc">t</span><span class="w">           </span><span class="err">=</span><span class="w"> </span><span class="mi">5439</span>
+<a id="__codelineno-10-7" name="__codelineno-10-7" href="#__codelineno-10-7"></a><span class="w">  </span><span class="err">pro</span><span class="kc">t</span><span class="err">ocol</span><span class="w">          </span><span class="err">=</span><span class="w"> </span><span class="s2">&quot;tcp&quot;</span>
+<a id="__codelineno-10-8" name="__codelineno-10-8" href="#__codelineno-10-8"></a><span class="w">  </span><span class="err">cidr_blocks</span><span class="w">       </span><span class="err">=</span><span class="w"> </span><span class="p">[</span><span class="s2">&quot;142.251.74.0/23&quot;</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;74.125.0.0/16&quot;</span><span class="p">]</span><span class="w"> </span><span class="err">#</span><span class="w"> </span><span class="err">IP</span><span class="w"> </span><span class="err">Looker</span><span class="w"> </span><span class="err">s</span><span class="kc">tu</span><span class="err">dio</span>
+<a id="__codelineno-10-9" name="__codelineno-10-9" href="#__codelineno-10-9"></a><span class="w">  </span><span class="err">securi</span><span class="kc">t</span><span class="err">y_group_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">da</span><span class="kc">ta</span><span class="err">.aws_securi</span><span class="kc">t</span><span class="err">y_group.securi</span><span class="kc">t</span><span class="err">y_group_da</span><span class="kc">ta</span><span class="err">.id</span>
+<a id="__codelineno-10-10" name="__codelineno-10-10" href="#__codelineno-10-10"></a><span class="p">}</span>
+</code></pre></div>
+</div>
+</div>
+</div>
+<div class="admonition tip">
+<p class="admonition-title">Adicionado dado de captura automática ip</p>
+<p><div class="highlight"><pre><span></span><code><a id="__codelineno-11-1" name="__codelineno-11-1" href="#__codelineno-11-1"></a><span class="err">da</span><span class="kc">ta</span><span class="w"> </span><span class="s2">&quot;http&quot;</span><span class="w"> </span><span class="s2">&quot;meu_ip&quot;</span><span class="w"> </span><span class="p">{</span>
+<a id="__codelineno-11-2" name="__codelineno-11-2" href="#__codelineno-11-2"></a><span class="w">  </span><span class="err">url</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="s2">&quot;https://ipv4.icanhazip.com&quot;</span>
+<a id="__codelineno-11-3" name="__codelineno-11-3" href="#__codelineno-11-3"></a><span class="p">}</span>
+</code></pre></div>
+Agora toda vez que seu Ip mudar, você não precisa mais alterar manualmente o número do IP. 
+Basta usar o <code>terraform plan</code> para verificar as mudanças e <code>terraform apply -auto-approve</code> para aplicá-las.</p>
+</div>
+<h3 id="criação-de-usuários-grupos-e-adição-de-usuário-ao-grupo"><strong><em>Criação de usuários, grupos e adição de usuário ao grupo</em></strong><a class="headerlink" href="#criação-de-usuários-grupos-e-adição-de-usuário-ao-grupo" title="Permanent link">&para;</a></h3>
+<div class="admonition bug">
+<p class="admonition-title">Recurso Removido</p>
+<p>Os recursos específicos para este tópico estavam gerando instabilidades no terraform,
+ então a criação dos usuários, grupos e adição de usuários ao grupos foram movidos para o <code>python</code> no tópico <a href="../python/#criar-usuarios-grupos-vinculos-python">Criação de usuários, grupos e vinculos</a></p>
+</div>
+<h3 id="salvando-usuários-e-senhas-no-secret-manager"><strong><em>Salvando usuários e senhas no Secret Manager</em></strong><a class="headerlink" href="#salvando-usuários-e-senhas-no-secret-manager" title="Permanent link">&para;</a></h3>
+<p>Um recurso muito importante quando trata-se de guardar dados mais sensíveis, principalmente quando estamos gerando senhas e logins como é caso desse pequeno projeto. O script vai guardar os logins e senhas referente ao Redshift, além de outras informações para serem utilizadas no python futuramente.</p>
+<div class="highlight"><pre><span></span><code><a id="__codelineno-12-1" name="__codelineno-12-1" href="#__codelineno-12-1"></a><span class="err">resource</span><span class="w"> </span><span class="s2">&quot;aws_secretsmanager_secret_version&quot;</span><span class="w"> </span><span class="s2">&quot;rd_secret_version&quot;</span>
+<a id="__codelineno-12-2" name="__codelineno-12-2" href="#__codelineno-12-2"></a><span class="p">{</span>
+<a id="__codelineno-12-3" name="__codelineno-12-3" href="#__codelineno-12-3"></a><span class="w">  </span><span class="err">secre</span><span class="kc">t</span><span class="err">_id</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">aws_secre</span><span class="kc">ts</span><span class="err">ma</span><span class="kc">na</span><span class="err">ger_secre</span><span class="kc">t</span><span class="err">.rd_secre</span><span class="kc">t</span><span class="err">.id</span>
+<a id="__codelineno-12-4" name="__codelineno-12-4" href="#__codelineno-12-4"></a><span class="w">  </span><span class="err">secre</span><span class="kc">t</span><span class="err">_s</span><span class="kc">tr</span><span class="err">i</span><span class="kc">n</span><span class="err">g</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">jso</span><span class="kc">nen</span><span class="err">code(</span><span class="p">{</span>
+<a id="__codelineno-12-5" name="__codelineno-12-5" href="#__codelineno-12-5"></a><span class="w">    </span><span class="err">e</span><span class="kc">n</span><span class="err">gi</span><span class="kc">ne</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="s2">&quot;redshift&quot;</span>
+<a id="__codelineno-12-6" name="__codelineno-12-6" href="#__codelineno-12-6"></a><span class="w">    </span><span class="err">da</span><span class="kc">ta</span><span class="err">_base</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">aws_redshi</span><span class="kc">ft</span><span class="err">_clus</span><span class="kc">ter</span><span class="err">.clus</span><span class="kc">ter</span><span class="err">_reds.da</span><span class="kc">ta</span><span class="err">base_</span><span class="kc">na</span><span class="err">me</span>
+<a id="__codelineno-12-7" name="__codelineno-12-7" href="#__codelineno-12-7"></a><span class="w">    </span><span class="err">user</span><span class="kc">na</span><span class="err">me</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">aws_redshi</span><span class="kc">ft</span><span class="err">_clus</span><span class="kc">ter</span><span class="err">.clus</span><span class="kc">ter</span><span class="err">_reds.mas</span><span class="kc">ter</span><span class="err">_user</span><span class="kc">na</span><span class="err">me</span>
+<a id="__codelineno-12-8" name="__codelineno-12-8" href="#__codelineno-12-8"></a><span class="w">    </span><span class="err">password</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">aws_redshi</span><span class="kc">ft</span><span class="err">_clus</span><span class="kc">ter</span><span class="err">.clus</span><span class="kc">ter</span><span class="err">_reds.mas</span><span class="kc">ter</span><span class="err">_password</span>
+<a id="__codelineno-12-9" name="__codelineno-12-9" href="#__codelineno-12-9"></a><span class="w">    </span><span class="err">por</span><span class="kc">t</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">aws_redshi</span><span class="kc">ft</span><span class="err">_clus</span><span class="kc">ter</span><span class="err">.clus</span><span class="kc">ter</span><span class="err">_reds.por</span><span class="kc">t</span>
+<a id="__codelineno-12-10" name="__codelineno-12-10" href="#__codelineno-12-10"></a><span class="w">    </span><span class="err">hos</span><span class="kc">t</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">aws_redshi</span><span class="kc">ft</span><span class="err">_clus</span><span class="kc">ter</span><span class="err">.clus</span><span class="kc">ter</span><span class="err">_reds.e</span><span class="kc">n</span><span class="err">dpoi</span><span class="kc">nt</span>
+<a id="__codelineno-12-11" name="__codelineno-12-11" href="#__codelineno-12-11"></a><span class="w">    </span><span class="err">dbClus</span><span class="kc">ter</span><span class="err">Ide</span><span class="kc">nt</span><span class="err">i</span><span class="kc">f</span><span class="err">ier</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">aws_redshi</span><span class="kc">ft</span><span class="err">_clus</span><span class="kc">ter</span><span class="err">.clus</span><span class="kc">ter</span><span class="err">_reds.clus</span><span class="kc">ter</span><span class="err">_ide</span><span class="kc">nt</span><span class="err">i</span><span class="kc">f</span><span class="err">ier</span>
+<a id="__codelineno-12-12" name="__codelineno-12-12" href="#__codelineno-12-12"></a><span class="w">    </span><span class="err">db</span><span class="kc">t</span><span class="err">_prod</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="s2">&quot;dbt_prod&quot;</span>
+<a id="__codelineno-12-13" name="__codelineno-12-13" href="#__codelineno-12-13"></a><span class="w">    </span><span class="err">db</span><span class="kc">t</span><span class="err">_prod_password</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">ra</span><span class="kc">n</span><span class="err">dom_password.password</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="err">.resul</span><span class="kc">t</span>
+<a id="__codelineno-12-14" name="__codelineno-12-14" href="#__codelineno-12-14"></a><span class="w">    </span><span class="err">db</span><span class="kc">t</span><span class="err">_dev</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="s2">&quot;dbt_dev&quot;</span>
+<a id="__codelineno-12-15" name="__codelineno-12-15" href="#__codelineno-12-15"></a><span class="w">    </span><span class="err">db</span><span class="kc">t</span><span class="err">_dev_password</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">ra</span><span class="kc">n</span><span class="err">dom_password.password</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="err">.resul</span><span class="kc">t</span>
+<a id="__codelineno-12-16" name="__codelineno-12-16" href="#__codelineno-12-16"></a><span class="w">    </span><span class="err">looker_user</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="s2">&quot;looker&quot;</span>
+<a id="__codelineno-12-17" name="__codelineno-12-17" href="#__codelineno-12-17"></a><span class="w">    </span><span class="err">looker_password</span><span class="w"> </span><span class="err">=</span><span class="w"> </span><span class="err">ra</span><span class="kc">n</span><span class="err">dom_password.password</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="err">.resul</span><span class="kc">t</span>
+<a id="__codelineno-12-18" name="__codelineno-12-18" href="#__codelineno-12-18"></a><span class="w">  </span><span class="p">}</span><span class="err">)</span>
+<a id="__codelineno-12-19" name="__codelineno-12-19" href="#__codelineno-12-19"></a><span class="p">}</span>
+</code></pre></div>
+<h3 id="recursos-provisionados_2"><em>Recursos provisionados</em><a class="headerlink" href="#recursos-provisionados_2" title="Permanent link">&para;</a></h3>
+<table>
+<thead>
+<tr>
+<th>Recursos do Provedor</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>aws_iam_policy</code></td>
+<td>Fornece uma política IAM</td>
+</tr>
+<tr>
+<td><code>aws_iam_role</code></td>
+<td>Fornece uma função IAM</td>
+</tr>
+<tr>
+<td><code>aws_iam_role_policy_attachment</code></td>
+<td>Anexa uma política IAM gerenciada a uma função IAM</td>
+</tr>
+<tr>
+<td><code>aws_redshift_cluster</code></td>
+<td>Fornece um recurso de cluster do Redshift</td>
+</tr>
+<tr>
+<td><code>aws_redshift_cluster_iam_roles</code></td>
+<td>Fornece um recurso de funções IAM do cluster do Redshift</td>
+</tr>
+<tr>
+<td><code>aws_secretsmanager_secret</code></td>
+<td>Fornece um recurso para gerenciar metadados secretos do AWS Secrets Manager</td>
+</tr>
+<tr>
+<td><code>aws_secretsmanager_secret_version</code></td>
+<td>Fornece um recurso para gerenciar a versão secreta<br> do AWS Secrets Manager, incluindo seu valor secreto</td>
+</tr>
+<tr>
+<td><code>aws_security_group_rule</code></td>
+<td>Fornece um recurso de regra de grupo de segurança.<br> Representa uma única regra de grupo de entrada ou saída, que pode ser adicionada a grupos de segurança externos</td>
+</tr>
+</tbody>
+</table>
+<table>
+<thead>
+<tr>
+<th>Recursos do Terraform</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>random_password</code></td>
+<td>Idêntico a random_string com a exceção de que o resultado<br> é tratado como confidencial e, portanto, não é exibido na saída do console</td>
+</tr>
+<tr>
+<td><code>random_pet</code></td>
+<td>O recurso random_pet gera nomes de animais de estimação aleatórios que devem ser usados como identificadores exclusivos para outros recursos</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ordem-da-execucao-dos-comandos_1"><em>Ordem da execução dos comandos</em><a class="headerlink" href="#ordem-da-execucao-dos-comandos_1" title="Permanent link">&para;</a></h3>
+<p><a href="#order_execute">Clique aqui para ir na ordem dos comandos</a></p>
+<h2 id="extra-comandos">[Extra] Comandos<a class="headerlink" href="#extra-comandos" title="Permanent link">&para;</a></h2>
+<table>
+<thead>
+<tr>
+<th align="left">comandos</th>
+<th align="left">descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td align="left">terraform init</td>
+<td align="left">Inicializa a configuração do Terraform</td>
+</tr>
+<tr>
+<td align="left">terraform plan</td>
+<td align="left">comando permite visualizar as ações que o Terraform executaria para modificar sua infraestrutura ou salvar um plano especulativo que pode ser aplicado posteriormente</td>
+</tr>
+<tr>
+<td align="left">terraform destroy</td>
+<td align="left">Destrói a configuração provisionada</td>
+</tr>
+<tr>
+<td align="left">terraform validate</td>
+<td align="left">Valida sua configuração</td>
+</tr>
+<tr>
+<td align="left">terraform plan -out="tfplan.out"</td>
+<td align="left">Gera um arquivo .out do resultado executado pelo terraform plan</td>
+</tr>
+<tr>
+<td align="left">terraform apply "tfplan.out"</td>
+<td align="left">Executa modificações com base no arquivo marcado</td>
+</tr>
+<tr>
+<td align="left">terraform plan -destroy -out="des.plan"</td>
+<td align="left">Gera um arquivo .plan do resultado executado pelo terraform destroy</td>
+</tr>
+<tr>
+<td align="left">terraform apply "des.plan"</td>
+<td align="left">Executa modificações de acordo com o arquivo marcado</td>
+</tr>
+</tbody>
+</table>
+<h2 id="check-objetivos"><span class="twemoji"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 5h6v6H3V5m2 2v2h2V7H5m6 0h10v2H11V7m0 8h10v2H11v-2m-6 5-3.5-3.5 1.41-1.41L5 17.17l4.59-4.58L11 14l-6 6Z"/></svg></span> Check Objetivos<a class="headerlink" href="#check-objetivos" title="Permanent link">&para;</a></h2>
+<p>Os ícones <span class="twemoji" style="color: #00e676"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M1 12C1 5.925 5.925 1 12 1s11 4.925 11 11-4.925 11-11 11S1 18.075 1 12zm16.28-2.72a.75.75 0 0 0-1.06-1.06l-5.97 5.97-2.47-2.47a.75.75 0 0 0-1.06 1.06l3 3a.75.75 0 0 0 1.06 0l6.5-6.5z"/></svg></span> são os finalizados e os <span class="twemoji" style="color: var(--md-default-fg-color--lightest)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill-rule="evenodd" d="M1 12C1 5.925 5.925 1 12 1s11 4.925 11 11-4.925 11-11 11S1 18.075 1 12zm16.28-2.72a.75.75 0 0 0-1.06-1.06l-5.97 5.97-2.47-2.47a.75.75 0 0 0-1.06 1.06l3 3a.75.75 0 0 0 1.06 0l6.5-6.5z"/></svg></span> são os em abertos.</p>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <a href="#create_remote_state">Criação de um remote state</a></li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <a href="#create_bucket">Criação de um bucket S3</a></li>
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <a href="#create_cluster_redshift">Criação de um cluster Redshift</a></li>
+<li>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <a href="#adição-de-entrada-cidr">Adição de entradas cidr</a></li>
+</ul>
+</li>
+<li>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <a href="#criação-de-usuários-grupos-e-adição-de-usuário-ao-grupo">Criando grupos e usuários</a></li>
+</ul>
+</li>
+<li>
+<ul class="task-list">
+<li class="task-list-item"><label class="task-list-control"><input type="checkbox" disabled checked/><span class="task-list-indicator"></span></label> <a href="#salvando-usuários-e-senhas-no-secret-manager">Salvando dados sensíveis no Secrets Manager</a></li>
+</ul>
+</li>
+</ul>
+
+              
+            </article>
+            
+          </div>
+        </div>
+        
+          <a href="#" class="md-top md-icon" data-md-component="top" hidden>
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12Z"/></svg>
+            Back to top
+          </a>
+        
+      </main>
+      
+        <footer class="md-footer">
+  
+    
+    <nav class="md-footer__inner md-grid" aria-label="Footer" >
+      
+        
+        <a href="../" class="md-footer__link md-footer__link--prev" aria-label="Previous: Desenvolvimento" rel="prev">
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12Z"/></svg>
+          </div>
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Previous
+              </span>
+              Desenvolvimento
+            </div>
+          </div>
+        </a>
+      
+      
+        
+        <a href="../python/" class="md-footer__link md-footer__link--next" aria-label="Next: Usando Python para automatizar" rel="next">
+          <div class="md-footer__title">
+            <div class="md-ellipsis">
+              <span class="md-footer__direction">
+                Next
+              </span>
+              Usando Python para automatizar
+            </div>
+          </div>
+          <div class="md-footer__button md-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M4 11v2h12l-5.5 5.5 1.42 1.42L19.84 12l-7.92-7.92L10.5 5.5 16 11H4Z"/></svg>
+          </div>
+        </a>
+      
+    </nav>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-copyright">
+  
+    <div class="md-copyright__highlight">
+      Copyright &copy; 2023 Aylton Aguiar
+    </div>
+  
+  
+    Made with
+    <a href="https://squidfunk.github.io/mkdocs-material/" target="_blank" rel="noopener">
+      Material for MkDocs
+    </a>
+  
+</div>
+      
+        <div class="md-social">
+  
+    
+    
+      
+      
+    
+    <a href="https://github.com/AyltonAguiar" target="_blank" rel="noopener" title="github.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z"/></svg>
+    </a>
+  
+    
+    
+      
+      
+    
+    <a href="https://www.linkedin.com/in/aylton-aguiar" target="_blank" rel="noopener" title="www.linkedin.com" class="md-social__link">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><!--! Font Awesome Free 6.1.1 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free (Icons: CC BY 4.0, Fonts: SIL OFL 1.1, Code: MIT License) Copyright 2022 Fonticons, Inc.--><path d="M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3zM135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5zm282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9V416z"/></svg>
+    </a>
+  
+</div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../../../..", "features": ["content.code.annotate", "header.autohide", "navigation.expand", "navigation.footer", "navigation.indexes", "navigation.path", "navigation.tabs", "navigation.tabs.sticky", "navigation.top", "navigation.tracking", "search.highlight", "search.share", "search.suggest"], "search": "../../../../assets/javascripts/workers/search.b97dbffb.min.js", "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version.title": "Select version"}}</script>
+    
+    
+      <script src="../../../../assets/javascripts/bundle.6c7ad80a.min.js"></script>
+      
+    
+  </body>
+</html>
