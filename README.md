@@ -1,11 +1,13 @@
 # Projeto Engenheiro de Dados
 
 ## Descrição
-O intuito do conteúdo é apresentar, de forma superficial, um cenário para agregar com as resoluções do módulo de *Projeto Final 1* do curso de [Formação Engenharia de Dados [2022]: Domine Big Data!](https://www.udemy.com/course/engenheiro-de-dados). 
+O intuito do conteúdo é apresentar, de forma superficial, um conjunto de tecnologias para agregar com as resoluções do módulo de *Projeto Final 1* do curso de [Formação Engenharia de Dados [2022]: Domine Big Data!](https://www.udemy.com/course/engenheiro-de-dados). 
+
+Aqui vamos criar a infraestrutura pelo terraform e adicionar os dados em conjunto. Com os dados armazenados na cloud, estaremos utilizando o python para consumir esses objetos e adicioná-los ao warehouse redshift. A organização dos dados será feita pelo dbt cloud, focando nas querys, tests, jobs e principalmente na documentação. Ao final estaremos permitindo que esses dados tratados possam ser acessados pelo looker studio. Enjoy! ;D
 
 ## Documentação
 
-A documentação sobre o projeto encontra-se em [Northwind-Mkdocs](https://ayltonaguiar.github.io/Northwind-Mkdocs/){:target="blanck"}.
+A documentação sobre o projeto encontra-se em [Northwind-Mkdocs](https://ayltonaguiar.github.io/Northwind-Mkdocs/).
 
 ## Stack
 As seguintes ferramentas e tecnologias serão utilizadas no projeto:
@@ -21,7 +23,7 @@ As seguintes ferramentas e tecnologias serão utilizadas no projeto:
 
 ### Diagrama: 
 
-![image](https://imgur.com/YZrcGbn.png)
+![image](https://imgur.com/bv5ET3m.png)
 
 ## Pré-Requisitos
 Para começar, você precisará:
