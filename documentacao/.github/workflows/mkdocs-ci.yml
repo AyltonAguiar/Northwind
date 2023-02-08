@@ -1,4 +1,4 @@
-name: mkdocs-ci 
+name: mkdocs-ci_example 
 on:
   push:
     branches:
@@ -6,9 +6,14 @@ on:
       - main
 permissions:
   contents: write
+
+env:
+  MKDOCS_SITE: documentacao
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
