@@ -280,5 +280,4 @@ def csv_to_redshift(cur, s3, bucket_name, list_objects, redshift_details, redshi
         """)
 
         print('',"Copy do Objeto Finalizado", sep='\n')
-        # O truncatecolumns é muito importante para truncar valores até o tamanho do varchar(256)
-        # caso os dados na coluna excedam o varchar(256) e não estiver com o truncatecolumns o excute copy dará erro.
+ 
