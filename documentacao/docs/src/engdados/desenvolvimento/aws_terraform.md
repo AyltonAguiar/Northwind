@@ -126,13 +126,13 @@ Pode-se modificar `description` e `cidr_blocks`.
     ``` json
     resource "aws_security_group_rule" "security_rule"
     {
-      description       = "Redshift Aylton"
-      type              = "ingress"
-      from_port         = 5439
-      to_port           = 5439
-      protocol          = "tcp"
-      cidr_blocks       = ["XXX.XXX.XXX.XXX/XX"] # Adicione seu IP
-      security_group_id = data.aws_security_group.security_group_data.id
+    description       = "Redshift Aylton"
+    type              = "ingress"
+    from_port         = 5439
+    to_port           = 5439
+    protocol          = "tcp"
+    cidr_blocks       = ["${chomp(data.http.meu_ip.response_body)}/32"] # meu IP
+    security_group_id = data.aws_security_group.security_group_data.id
     }
     ```
 
@@ -166,68 +166,22 @@ Pode-se modificar `description` e `cidr_blocks`.
     }
     ```
 
+!!! tip "Adicionado dado de captura automática ip"
+    
+    ``` json
+    data "http" "meu_ip" {
+      url = "https://ipv4.icanhazip.com"
+    }
+    ```
+    Agora toda vez que seu Ip mudar, você não precisa mais alterar manualmente o número do IP. 
+    Basta usar o `terraform plan` para verificar as mudanças e `terraform apply -auto-approve` para aplicá-las.
+
 ### __*Criação de usuários, grupos e adição de usuário ao grupo*__ {#criação-de-usuários-grupos-e-adição-de-usuário-ao-grupo}
 
-Foram divididos em 3 partes. A primeira cria apenas os grupos, A segunda cria somente os usuários e por último adiciona usuários aos grupos. O arquivo com os nomes dos usuários, grupos e vínculos estão no arquivo `terraform\03_aws_redshift\locals.tf`.
-
-Cada etapa está com o `depends_on`, pois necessita que outros recursos estejam finalizados para darem prosseguimento. E `lifecycle` com configuração de ignorar mudanças.
-
-=== ":octicons-file-code-16: `"groups_database"`"
-
-    ``` json
-    resource "aws_redshiftdata_statement" "groups_database"
-    {
-      for_each = local.groups
-      cluster_identifier = aws_redshift_cluster.cluster_reds.cluster_identifier
-      database           = aws_redshift_cluster.cluster_reds.database_name
-      db_user            = aws_redshift_cluster.cluster_reds.master_username
-      sql                = "CREATE GROUP ${each.key};"
-      lifecycle {
-        ignore_changes = all
-        }
-      depends_on = [
-        aws_redshift_cluster.cluster_reds, aws_redshift_cluster_iam_roles.s3-readonly
-        ]
-    }
-    ```
-
-=== ":octicons-file-code-16: `"users_database"`"
-
-    ``` json
-    resource "aws_redshiftdata_statement" "users_database"
-    {
-      for_each = local.users_groups
-      cluster_identifier = aws_redshift_cluster.cluster_reds.cluster_identifier
-      database           = aws_redshift_cluster.cluster_reds.database_name
-      db_user            = aws_redshift_cluster.cluster_reds.master_username
-      sql                = "create user ${each.key} with password '${random_password.password[each.value].result}';"
-      lifecycle {
-        ignore_changes = all
-        }
-      depends_on = [
-        aws_redshift_cluster.cluster_reds, aws_redshift_cluster_iam_roles.s3-readonly
-        ]
-    }
-    ```
-
-=== ":octicons-file-code-16: `"users_groups_database"`"
-
-    ``` json
-    resource "aws_redshiftdata_statement" "users_groups_database"
-    {
-      for_each = local.groups_category
-      cluster_identifier = aws_redshift_cluster.cluster_reds.cluster_identifier
-      database           = aws_redshift_cluster.cluster_reds.database_name
-      db_user            = aws_redshift_cluster.cluster_reds.master_username
-      sql                = "alter group ${each.value} add user ${each.key};"
-      lifecycle {
-        ignore_changes = all
-        }
-      depends_on = [
-        aws_redshiftdata_statement.groups_database, aws_redshiftdata_statement.users_database
-        ]
-    }
-    ```
+!!! Bug "Recurso Removido"
+    
+    Os recursos específicos para este tópico estavam gerando instabilidades no terraform,
+     então a criação dos usuários, grupos e adição de usuários ao grupos foram movidos para o `python` no tópico [Criação de usuários, grupos e vinculos](python.md#criar-usuarios-grupos-vinculos-python)
 
 ### __*Salvando usuários e senhas no Secret Manager*__ {#salvando-usuários-e-senhas-no-secret-manager}
 

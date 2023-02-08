@@ -1,5 +1,5 @@
 # Informações do Projeto
-site_name: Projeto Engdados
+site_name: Projeto Northwind
 site_author: Aylton Aguiar
 site_description: >-
     <p> Documentação do Projeto de engenharia de dados. </p>
@@ -132,9 +132,9 @@ repo_url: https://github.com/AyltonAguiar/northwind
 # Árvore de Navegação
 nav:
     - Início: index.md
-    - Começar: 
+    - Projeto Northwind: 
       - src/engdados/index.md
-      - Escopo: src/engdados/escopo/escopo.md
+      - Introdução: src/engdados/introducao.md
       - Pré-Requisitos: src/engdados/prerequisitos.md
       - Arquitetura: src/engdados/arquitetura/arquitetura.md
       - Desenvolvimento: 
@@ -144,7 +144,7 @@ nav:
         - Utilizando Dbt cloud: src/engdados/desenvolvimento/dbt.md
         - Utilizando Looker Studio: src/engdados/desenvolvimento/desenvolvimento_lookerstudio.md
       - Referências: src/engdados/desenvolvimento/referencias.md
-    - Documentar:
+    - Como documentar?:
       - src/documentacao/iniciando.md
       - src/documentacao/arquitetura.md
       - src/documentacao/publicacao-mkdocs.md

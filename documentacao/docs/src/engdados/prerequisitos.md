@@ -61,7 +61,3 @@ Abaixo Tutoriais de instalação:
 
 [Tutorial python]:(#tutorial-python)
 
-## __Guidelines do projeto__
-
-- [Arquitetura do Projeto](./arquitetura/arquitetura.md)
-
