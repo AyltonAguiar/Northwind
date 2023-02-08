@@ -23,7 +23,7 @@ jobs:
         with:
           key: ${{ github.ref }}
           path: .cache
-      - run: pip install -r ${{ env.MKDOCS_SITE }}/requirements.txt
+      - run: pip install -r ${{ env.documentacao }}/requirements.txt
       - run: pip install \
                mkdocs-material
       - run: mkdocs gh-deploy --force
