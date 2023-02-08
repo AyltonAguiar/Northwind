@@ -1,6 +1,8 @@
 name: mkdocs-ci_example 
 on:
   push:
+    paths:
+      - documentacao/**
     branches:
       - master 
       - main
