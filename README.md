@@ -7,7 +7,11 @@ Aqui vamos criar a infraestrutura pelo terraform e adicionar os dados em conjunt
 
 ## Documentação
 
-A documentação sobre o projeto encontra-se em [Northwind-Mkdocs](https://ayltonaguiar.github.io/Northwind-Mkdocs/).
+Existem 2 modelos sobre as documentações com diferenças sobre a localização do mkdocs no repositório e arquivo "mkdocs-ci.yml":
+* Para a documentação com diretório específico: [northwind](https://ayltonaguiar.github.io/northwind).
+* Para a documentação com diretório na raiz: [northwind-mkdocs](https://ayltonaguiar.github.io/northwind-mkdocs).
+
+"O que realmente muda em cada uma?" - você deve pensar. O primeiro modelo é para você que deseja apenas criar um diretório específico para documentação dentro do seu projeto sem a necessidade de criar um novo repositório para isso. O segundo modelo é para você separar o projeto real da documentação, em alguns momentos você não deseja compartilhar o código do projeto, mas somente a documentação com equipes específicas. Lembrando que a existência de ambos é de caráter didático.
 
 ## Stack
 As seguintes ferramentas e tecnologias serão utilizadas no projeto:
